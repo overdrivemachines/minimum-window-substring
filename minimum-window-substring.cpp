@@ -13,10 +13,10 @@ string minWindow(string s, string t) {
   char left_char, right_char;  // characters at s[left_index] and s[right_index]
   int s_length = s.length(), t_length = t.length();
   int have_chars = 0, need_chars;
-  int min_window_length = s_length;
+  int min_window_length = s_length + 1;
   int min_window_left_index, min_window_right_index;
 
-  cout << "s = " << s << " t = " << t << "\n";
+  // cout << "s = " << s << " t = " << t << "\n";
 
   if (t_length > s_length)
     return "";
@@ -27,14 +27,14 @@ string minWindow(string s, string t) {
   // t_map[c] = (t_map.count(c)) ? (t_map[c] + 1) : 1;
   need_chars = t_map.size();
 
-  cout << "Need Chars: " << need_chars << "\n";
+  // cout << "Need Chars: " << need_chars << "\n";
 
   left_char = s[0];
-  for (right_index = 0; right_index < s_length - 1; right_index++) {
+  for (right_index = 0; right_index < s_length; right_index++) {
     // window string is s[left_index..right_index]
-    // window string = s.substr(left_index, (right_index - left_index))
+    // window string = s.substr(left_index, (right_index - left_index + 1))
 
-    // s = "AAZZZAAABBBCCCCC", t = "BBBCCCA"
+    // s = "cabwefgewcwaefgcf", t = "cae"
 
     right_char = s[right_index];
     // if t_map['A'] > 0, add 'A' to window_map
@@ -47,32 +47,48 @@ string minWindow(string s, string t) {
         // Check if window is valid
         if (have_chars == need_chars) {
           // Valid window
-          cout << "Valid Window: " << left_index << "-" << right_index << ": " << s.substr(left_index, right_index - left_index + 1) << "\n";
+          // cout << "Valid Window: " << left_index << "-" << right_index << ":" << right_index - left_index + 1 << ": " << s.substr(left_index, right_index - left_index + 1) << "\n";
 
           // check if current window is smaller in length than previously found valid window
-          if ((right_index - left_index) < min_window_length) {
+          if ((right_index - left_index + 1) < min_window_length) {
             // current window is the shortest valid window seen so far
             min_window_length = right_index - left_index + 1;
             min_window_left_index = left_index;
             min_window_right_index = right_index;
+          }
 
-            // move the left index until have_chars is less than need_chars
-            while ((left_index <= right_index) && (have_chars == need_chars)) {
-              left_char = s[left_index];
-              if (window_map[left_char] > t_map[left_char]) {
-                left_index++;
-                window_map[left_char]--;
-              }
+          // move the left index until have_chars is less than need_chars
+          while ((left_index <= right_index) && (have_chars == need_chars)) {
+            window_map[left_char]--;
+
+            if (t_map.count(left_char)) {
+              if (window_map[left_char] < t_map[left_char])
+                have_chars--;
+            }
+
+            left_index++;
+            left_char = s[left_index];
+
+            // cout << "New Left: " << left_index << ": " << left_char << ((have_chars == need_chars) ? " valid" : " invalid") << "\n";
+
+            // check if current window is smaller in length than previously found valid window
+            if ((have_chars == need_chars) && (right_index - left_index + 1 < min_window_length)) {
+              // current window is the shortest valid window seen so far
+              min_window_length = right_index - left_index + 1;
+              min_window_left_index = left_index;
+              min_window_right_index = right_index;
             }
           }
+
+          // cout << "Valid Window: " << min_window_left_index << "-" << min_window_right_index << ":" << min_window_length << ": " << s.substr(min_window_left_index, min_window_length) << "\n";
+          // cout << "New Left: " << left_index << ": " << left_char << "\n";
         }
       }
     }
-
-    // check if window is valid.
-    // for a window to be valid it must contain all the characters in t
   }
 
+  if (min_window_length != s_length + 1)
+    return s.substr(min_window_left_index, min_window_length);
   return "";
 }
 
@@ -87,7 +103,8 @@ int main(int argc, char const *argv[]) {
   // cout << minWindow("AAAAF", "FGH") << "\n";
   // cout << minWindow("bba", "ab") << "\n";
   // cout << minWindow("babb", "baba") << "\n";
-  cout << minWindow("AAZZZAAABBBCCCCC", "BBBCCCA") << "\n";
+  // cout << minWindow("AAZZZAAABBBCCCCCA", "BBBCCCA") << "\n";
+  cout << minWindow("cabwefgewcwaefgcf", "cae") << "\n";
 
   return 0;
 }
